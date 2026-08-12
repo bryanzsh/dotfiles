@@ -20,7 +20,7 @@
 ## 2. bspwm — `~/.config/bspwm/bspwmrc`
 
 **Configurado así:**
-- 9 escritorios `1..9`
+- 5 escritorios `1..5` (en la barra se ven como **5 círculos**: `●` ocupado / `○` vacío)
 - `border_width 1` · borde de la ventana enfocada **blanco** (`#ffffff`), resto gris `#30302f`
 - `window_gap 8`
 - Teclado latam · wallpaper **xwallpaper --daemon** · autostart con guardas `pgrep`/`pkill`
@@ -28,7 +28,7 @@
 - **Loop `bspc subscribe monitor_geometry`** (inline) que relanza polybar al cambiar la resolución
 
 **Por qué:**
-- 9 escritorios → coinciden con `Super+[1-9]` y `Super+Shift+[1-9]`.
+- 5 escritorios → coinciden con `Super+[1-5]` y `Super+Shift+[1-5]`; los círculos dan un indicador compacto: relleno blanco = ocupado/foco, hueco = vacío.
 - Borde blanco de 1px → resalta la ventana enfocada (la que controla `Ctrl+flechas`) sin pesadez visual.
 - `gap 8` → se bajó de 12 para un layout compacto que aproveche la pantalla.
 - Guardas anti-duplicado → bspwmrc se re-ejecuta en `Super+Alt+r`; sin `pgrep` habría dobles procesos (doble RAM/CPU).
@@ -44,14 +44,14 @@
 | `Super+Enter` | abre kitty |
 | `Super+Q` | cierra ventana enfocada |
 | `Super+Space` | toggle tiling/floating |
-| `Super+1..9` | cambia de escritorio |
-| `Super+Shift+1..9` | **mueve la ventana enfocada** al escritorio |
+| `Super+1..5` | cambia de escritorio |
+| `Super+Shift+1..5` | **mueve la ventana enfocada** al escritorio |
 | `Ctrl+↑↓←→` | mueve el foco entre ventanas (bspwm) |
 | `Super+Escape` | recarga sxhkd |
 | `Super+Alt+Q` / `Super+Alt+R` | salir / reiniciar bspwm |
 
 **Por qué:**
-- `Super+Shift+[1-9]` usa `bspc node -d` (mueve el **nodo**), distinto de `bspc desktop -f` (solo cambia). → con 2 ventanas, enfocas una y la mandas al escritorio que elijas.
+- `Super+Shift+[1-5]` usa `bspc node -d` (mueve el **nodo**), distinto de `bspc desktop -f` (solo cambia). → con 2 ventanas, enfocas una y la mandas al escritorio que elijas.
 - `Ctrl+flechas` asumió el conflicto con el salto de palabra en terminales (readline) porque priorizas navegar ventanas sin mouse. Cambiar a `super` es 1 línea si molesta.
 
 ---
@@ -60,15 +60,17 @@
 
 **Configurado así:**
 - Barra **negra** (`#000000`) con texto **blanco** (`#ffffff`)
-- Workspace enfocado **invertido**: fondo blanco + letra negra
+- **5 workspaces como círculos**: `●` foco/ocupados (blanco, foco con underline) y `○` vacíos (gris `#666666`)
 - Compacta: `height 20` · fuente `DejaVu Sans Mono:size=8` · paddings/márgenes mínimos
-- Módulos: workspaces · CPU · RAM · **IP eth0** · fecha/hora
+- Módulos: workspaces · CPU · RAM · **IP eth0** · fecha/hora (hora del sistema en **America/Lima**)
 - Sin tray (desactivado a propósito)
 
 **Por qué:**
-- Negro/blanco + chip invertido → máximo contraste, el escritorio activo salta a la vista.
+- Círculos → indicador compacto y minimalista; relleno blanco = hay ventanas (ocupado/foco), hueco = escritorio vacío.
+- Negro/blanco → máximo contraste; el foco se distingue por el underline.
 - Módulos todos `internal/*` (sin scripts) → consumo mínimo (~2% CPU, sin procesos hijos).
 - La IP sale con `%local_ip%` (variable interna de polybar 3.7.2) → cero scripts externos.
+- Fecha/hora peruana: se cambió la zona horaria del sistema a `America/Lima` (`timedatectl set-timezone America/Lima`), polybar la refleja al instante.
 - Compacta → ocupa menos y combina con el resto del look minimalista.
 
 ---

@@ -10,10 +10,10 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 ## Entorno bspwm — archivos de config
 | Archivo | Contenido |
 |---|---|
-| `~/.config/bspwm/bspwmrc` | escritorios 1-9, gap 8, border 1, borde de foco blanco, teclado latam, wallpaper **xwallpaper --daemon**, autostart con guardas `pgrep`/`pkill` + loop `bspc subscribe monitor_geometry` para relanzar polybar en resize |
+| `~/.config/bspwm/bspwmrc` | escritorios 1-5, gap 8, border 1, borde de foco blanco, teclado latam, wallpaper **xwallpaper --daemon**, autostart con guardas `pgrep`/`pkill` + loop `bspc subscribe monitor_geometry` para relanzar polybar en resize |
 | `~/.config/sxhkd/sxhkdrc` | atajos (ver abajo) |
 | `~/.config/picom/picom.conf` | backend `xrender` (clave en VM), esquinas 12px, blur `dual_kawase` 5, active-opacity 0.90, inactive-opacity 0.80, log `/tmp/picom.log` |
-| `~/.config/polybar/config.ini` | barra negra, texto blanco, workspace enfocado invertido (blanco/negro), CPU/RAM/IP eth0/fecha-hora, monitor auto (env `MONITOR` desde bspwmrc) |
+| `~/.config/polybar/config.ini` | barra negra, texto blanco, 5 workspaces como círculos (● foco/ocupado blanco, ○ vacío gris), CPU/RAM/IP eth0/fecha-hora (hora `America/Lima`), monitor auto (env `MONITOR` desde bspwmrc) |
 | `~/.config/kitty/kitty.conf` | font 10, opacidad 0.80, tema Catppuccin Mocha con fondo override `#000000`, font **JetBrainsMono Nerd Font** (variante no-Mono, recomendada por NvChad; Hack Nerd queda en `/usr/share/fonts/truetype/hacknerd` si se usa), navegación de splits ctrl+shift+flechas, sin `adjust_line_height` (evita letras recortadas) |
 
 ## Resize de la VM (importante, resuelto 2026-08-12)
@@ -24,7 +24,7 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 
 ## Atajos de teclado
 - `Super+Enter` → kitty · `Super+Q` → cerrar ventana · `Super+Space` → toggle tiling/floating
-- `Super+1..9` → cambiar escritorio · `Super+Shift+1..9` → mover la ventana enfocada a ese escritorio · `Super+Escape` → recargar sxhkd · `Super+Alt+r` → reiniciar bspwm/picom · `Super+Alt+q` → salir
+- `Super+1..5` → cambiar escritorio · `Super+Shift+1..5` → mover la ventana enfocada a ese escritorio · `Super+Escape` → recargar sxhkd · `Super+Alt+r` → reiniciar bspwm/picom · `Super+Alt+q` → salir
 - `Ctrl+flechas` → cambiar foco entre ventanas de **bspwm** (borde blanco en la activa)
 - `Ctrl+Shift+flechas` → mover foco entre **splits dentro de kitty** · `Ctrl+Shift+Enter` → nuevo split
 - `Ctrl+Shift+F5` → recargar config de kitty · `Ctrl+Shift+O` → opacidad en vivo

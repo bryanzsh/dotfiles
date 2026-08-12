@@ -46,8 +46,8 @@ si lo ejecutas de nuevo.
 | `Super+Enter` | abrir kitty |
 | `Super+Q` | cerrar ventana enfocada |
 | `Super+Space` | tiling / floating |
-| `Super+1..9` | cambiar de escritorio |
-| `Super+Shift+1..9` | mover ventana al escritorio |
+| `Super+1..5` | cambiar de escritorio |
+| `Super+Shift+1..5` | mover ventana al escritorio |
 | `Ctrl+↓↑←→` | mover foco (bspwm) |
 | `Ctrl+Shift+↓↑←→` | mover foco entre splits de kitty |
 | `Super+Alt+R` | reiniciar bspwm |

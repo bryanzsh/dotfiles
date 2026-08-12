@@ -36,8 +36,9 @@ setxkbmap -layout latam
 xsetroot -cursor_name left_ptr
 
 # --- Escritorios / Workspaces -----------------------------------------
-# Creamos 9 escritorios llamados 1..9 (coinciden con Super+[1-9]).
-bspc monitor -d 1 2 3 4 5 6 7 8 9
+# Creamos 5 escritorios llamados 1..5 (coinciden con Super+[1-5]).
+# En la barra se muestran como 5 circulos (● ocupado / ○ vacio).
+bspc monitor -d 1 2 3 4 5
 
 # --- Comportamiento basico de ventanas --------------------------------
 bspc config border_width          1

@@ -23,9 +23,9 @@ super + space
     bspc query -N -n focused.floating >/dev/null && bspc node -t tiled || bspc node -t floating
 
 # --- Cambio de escritorio ----------------------------------------------
-# Super + [1-9] enfoca el escritorio numerado (son 9: 1..9).
-super + {1-9}
-    bspc desktop -f ^{1-9}
+# Super + [1-5] enfoca el escritorio numerado (son 5: 1..5).
+super + {1-5}
+    bspc desktop -f ^{1-5}
 
 # --- Utilidades basicas (imprescindibles para trabajar) ----------------
 # Super + Escape recarga sxhkd tras editar este archivo sin reiniciar.
@@ -45,7 +45,7 @@ ctrl + {Left,Down,Up,Right}
     bspc node -f {west,south,north,east}
 
 # --- Mover ventana a otro escritorio ------------------------------------
-# Super + Shift + [1-9] manda la VENTANA ENFOCADA al escritorio elegido.
-# (Super + [1-9] normal solo cambia de escritorio; con Shift mueve la ventana.)
-super + shift + {1-9}
-    bspc node -d ^{1-9}
+# Super + Shift + [1-5] manda la VENTANA ENFOCADA al escritorio elegido.
+# (Super + [1-5] normal solo cambia de escritorio; con Shift mueve la ventana.)
+super + shift + {1-5}
+    bspc node -d ^{1-5}
