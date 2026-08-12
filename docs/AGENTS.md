@@ -19,7 +19,7 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 ## Resize de la VM (importante, resuelto 2026-08-12)
 - **Driver X correcto:** `xserver-xorg-video-vmware` (instalado desde **Debian bookworm** temporal; Kali dejó de compilarlo). Kali BTS #9496: con `modesetting` + VMware Workstation 25.x los eventos de resize/EDID llegan tarde o se pierden. Con `vmware_drv.so` Xorg maneja los modos solo. Instalado ude: source temporal `deb http://deb.debian.org/debian bookworm` → `apt install xserver-xorg-video-vmware` → borrar source.
 - **Ya NO existen scripts de resize** (`vm-resize.sh` eliminado, atajo `Super+Shift+R` quitado). Estilo s4vitar: cero scripts. bspwm re-tila solo ante `monitor_geometry`.
-- **Fondo que sigue al resize:** `xwallpaper --daemon --zoom ~/Pictures/retro1.png` (escucha RandR y repinta solo). Sustituyó a `feh`.
+- **Fondo que sigue al resize (rotativo):** loop inline en `bspwmrc` que muestra TODAS las imágenes de `~/Pictures` (png/jpg/jpeg), cambiando cada 60s, siempre con `xwallpaper --daemon --zoom` (escucha RandR y repinta solo). Guarda `pgrep -f WALLROT` anti-duplicado. Sustituyó a `feh`. Detalle completo en `docs/vmtools.md §11`.
 - **Polybar en resize:** loop inline en `bspwmrc`: `( pgrep -f 'bspc subscribe monitor_geometry' > /dev/null || bspc subscribe monitor_geometry | while read -r _; do ... polybar -r main &; done ) &`.
 
 ## Atajos de teclado
@@ -45,7 +45,7 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 - Kit terminal con JetBrainsMono Nerd Font (fuente no-Mono = iconos NvChad más grandes). Cambios de config en `~/.config/nvim/lua/plugins/init.lua` + `lua/configs/`. Líder = `Space`.
 
 ## Wallpaper
-- `~/Pictures/retro1.png` con **`xwallpaper --daemon --zoom`** (se queda escuchando RandR y repinta solo cuando cambia la resolución de la VM). Antes: `feh --bg-fill --no-fehbg`, y antes `xsetroot -solid`.
+- **Rotativo:** loop inline en `bspwmrc` muestra en bucle todas las imágenes de `~/Pictures` (ext. png/jpg/jpeg; filtro `case` descarta `.Zone.Identifier`), cambiando cada 60s. Siempre `xwallpaper --daemon --zoom` → repinta solo ante resize (RandR). Guarda `pgrep -f WALLROT`. Antes: `feh --bg-fill --no-fehbg`, y antes `xsetroot -solid`.
 
 ## Notas técnicas importantes
 - **Picom en VM**: usar SIEMPRE backend `xrender` (el GL iría por llvmpipe = caro). Blur corre en CPU: en reposo ~0.5-2% CPU; si pasa de ~6-7% bajar `blur-strength`.

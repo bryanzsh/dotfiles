@@ -9,12 +9,29 @@
 # Distribucion latinoamericana. Ajusta con: setxkbmap -layout <código>
 setxkbmap -layout latam
 
-# --- Fondo de pantalla (wallpaper con xwallpaper) ----------------------
-# xwallpaper "pinta y sale", pero con "--daemon" se queda escuchando
-# eventos RandR y REPINTA el wallpaper solo cuando cambia la resolucion
-# (achicar/expandir la ventana de la VM). "--zoom" equivale a "--bg-fill"
+# --- Fondo de pantalla (rotativo con xwallpaper) ------------------------
+# Muestra en bucle TODAS las imagenes de ~/Pictures, cambiando cada 60s.
+# xwallpaper "--daemon" se queda escuchando RandR y REPINTA solo cuando
+# cambia la resolucion (resize de la VM); "--zoom" equivale a "--bg-fill"
 # de feh: cubre toda la pantalla recortando segun el aspect ratio.
-xwallpaper --daemon --zoom "$HOME/Pictures/retro1.png" &
+# El glob ~/Pictures/* + filtro case excluye .Zone.Identifier y
+# *.png/jpg/jpeg; el glob es re-evaluado en cada vuelta (toma imagenes
+# nuevas sin recargar). Marcador WALLROT en el cmdline -> guarda
+# anti-duplicado para que Super+Alt+r no lance dos bucles.
+( pgrep -f WALLROT > /dev/null || \
+    setsid sh -c 'while true; do
+      for img in "$HOME"/Pictures/*; do
+        [ -f "$img" ] || continue
+        case "$img" in
+          *.png|*.jpg|*.jpeg|*.PNG|*.JPG|*.JPEG) ;;
+          *) continue ;;
+        esac
+        pkill -x xwallpaper 2> /dev/null
+        while pgrep -u "$(id -u)" -x xwallpaper > /dev/null; do sleep 0.1; done
+        xwallpaper --daemon --zoom "$img" &
+        sleep 60
+      done
+    done # WALLROT' > /dev/null 2>&1 ) &
 # Cursor de X como flecha normal (en vez del icono por defecto).
 xsetroot -cursor_name left_ptr
 

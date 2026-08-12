@@ -155,9 +155,11 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ## 9. Wallpaper
 
-- `~/Pictures/retro1.png` con **`xwallpaper --daemon --zoom`** (en bspwmrc).
-- **Por qué `--zoom`**: equivale a `--bg-fill` de feh — la imagen (2912×1632) cubre la pantalla recortando según el aspect ratio.
+- **Rotativo:** loop inline en `bspwmrc` que muestra en bucle **todas** las imágenes de `~/Pictures`, cambiando cada 60s. Filtro `case` (png/jpg/jpeg) que descarta `.Zone.Identifier`.
+- Cada ciclo usa **`xwallpaper --daemon --zoom "$img"`** (repinta solo ante resize).
+- **Por qué `--zoom`**: equivale a `--bg-fill` de feh — la imagen cubre la pantalla recortando según el aspect ratio.
 - **Por qué `--daemon`**: xwallpaper se queda escuchando **eventos RandR** y **repinta solo** el fondo cuando cambia la resolución (achicar/expandir la VM). feh pintaba una sola vez y quedaba desalineado con el resize. CPU en reposo ~0% (solo despierta ante RandR).
+- **Por qué rotativo**: prioridad del usuario — que el fondo varie cada minuto entre todas las imágenes de Pictures, sin scripts (estilo s4vitar). Guarda `pgrep -f WALLROT` anti-duplicado en `Super+Alt+r`.
 
 ---
 
@@ -178,7 +180,7 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 - **Driver X:** `xserver-xorg-video-vmware` desde Debian bookworm (Kali lo dejó de compilar). Con `modesetting` + VMware Workstation 25.x los eventos de resize/EDID llegan tarde o se pierden (Kali BTS #9496); con `vmware_drv.so` Xorg maneja los modos y bspwm re-tila solo ante `monitor_geometry`.
 - **Ya NO existe `vm-resize.sh` ni `Super+Shift+R`** (estilo s4vitar: cero scripts).
-- **Fondo:** `xwallpaper --daemon` repinta automático.
+- **Fondo:** `xwallpaper --daemon` repinta automático (rotativo: todas las imágenes de `~/Pictures` cada 60s).
 - **Polybar:** loop inline en `bspwmrc`: `bspc subscribe monitor_geometry | while read -r _; do pkill -x polybar; polybar -r main &; done` (guarda `pgrep -f` anti-duplicado). Su ancho no se auto-ajusta si no se relanza.
 - Fix aplicado: `pgrep -u "$(id -u)"` (`$UID` no existe en `sh`, daba usage).
 

@@ -122,8 +122,23 @@ Resolución acomodada en ~instantáneo, sin script ni atajo
 Las tres piezas reactivas viven en **`bspwmrc`**:
 
 ```sh
-# 1) Fondo que sigue a RandR (se queda daemon escuchando)
-xwallpaper --daemon --zoom "$HOME/Pictures/retro1.png" &
+# 1) Fondo ROTATIVO (todas las imagenes de ~/Pictures, cada 60s)
+#    xwallpaper "--daemon" sigue RandR y repinta solo ante el resize.
+#    Guarda WALLROT en el cmdline -> sin duplicados en Super+Alt+r.
+( pgrep -f WALLROT > /dev/null || \
+    setsid sh -c 'while true; do
+      for img in "$HOME"/Pictures/*; do
+        [ -f "$img" ] || continue
+        case "$img" in
+          *.png|*.jpg|*.jpeg|*.PNG|*.JPG|*.JPEG) ;;
+          *) continue ;;
+        esac
+        pkill -x xwallpaper 2> /dev/null
+        while pgrep -u "$(id -u)" -x xwallpaper > /dev/null; do sleep 0.1; done
+        xwallpaper --daemon --zoom "$img" &
+        sleep 60
+      done
+    done # WALLROT' > /dev/null 2>&1 ) &
 
 # 2) Polybar + resize: se relanza sola ante monitor_geometry
 ( pgrep -f 'bspc subscribe monitor_geometry' > /dev/null || \
@@ -137,7 +152,7 @@ xwallpaper --daemon --zoom "$HOME/Pictures/retro1.png" &
 pgrep -f vmware-user > /dev/null || /usr/bin/vmware-user-suid-wrapper > /dev/null 2>&1 &
 ```
 
-> Nota sobre `--zoom`: equivale al `--bg-fill` de feh (la imagen `~/Pictures/retro1.png`, 2912×1632, cubre la pantalla recortando según aspect ratio). `--daemon` = se queda escuchando RandR, CPU en reposo ~0 %.
+> Nota sobre `--zoom`: equivale al `--bg-fill` de feh (cubre la pantalla recortando según aspect ratio). `--daemon` = se queda escuchando RandR, CPU en reposo ~0 %; en cada ciclo el pkill + relanzamiento pinta la siguiente imagen de `~/Pictures` (glob re-evaluado: toma imágenes nuevas sin recargar).
 >
 > Nota polybar: su `width=%` se calcula al arrancar; por eso no alcanza con el evento — hay que **relanzarla**. El loop lo hace en bspwmrc, con guarda `pgrep` para no duplicarse en `Super+Alt+r`.
 
@@ -167,11 +182,32 @@ grep -m1 'Matched vmware' /var/log/Xorg.0.log            # driver cargado
 xrandr --current | grep Virtual1                         # resolución actual
 pgrep -f 'bspc subscribe monitor_geometry'               # loop de polybar vivo
 pgrep -x polybar ; pgrep -x xwallpaper                   # barra + fondo vivos
+pgrep -f WALLROT                                         # loop rotativo de fondo vivo
 ```
 
 ---
 
-## 10. Troubleshooting
+## 11. Wallpaper rotativo: cómo configurarlo
+
+El fondo de pantalla **rota cada 60 s** por todas las imágenes de `~/Pictures`
+(extensiones `png/jpg/jpeg`; el glob `~/Pictures/*` + filtro `case` descarta los
+`.Zone.Identifier` y otros archivos no-imagen).
+
+| Acción | Cómo |
+|---|---|
+| **Añadir una imagen** | Copiarla a `~/Pictures/` — el loop la toma en la próxima vuelta (glob re-evaluado). |
+| **Cambiar el intervalo** | Editar el `sleep 60` del loop en `bspwmrc` y recargar (`Super+Alt+r`). |
+| **Solo una imagen fija** | Quitar el loop rotativo del `bspwmrc` y volver a `xwallpaper --daemon --zoom "$HOME/Pictures/IMAGEN"` |
+| **Ver la imagen actual** | `pgrep -a xwallpaper` muestra con qué archivo está pintando el daemon. |
+
+**Por qué funciona con el resize:** aunque el loop mata y relanza el daemon cada
+minuto, ese daemon siempre se lanza con `--daemon` = escucha RandR y repinta solo
+si cambia la resolución en ese minuto; en el siguiente ciclo relanza con la misma
+fidelidad. El resize y la rotación conviven sin scripts.
+
+---
+
+## 12. Troubleshooting
 
 | Problema | Causa probable | Solución |
 |---|---|---|
@@ -183,7 +219,7 @@ pgrep -x polybar ; pgrep -x xwallpaper                   # barra + fondo vivos
 
 ---
 
-## 11. Archivos clave
+## 13. Archivos clave
 
 | Archivo | Pieza | Líneas relevantes |
 |---|---|---|
