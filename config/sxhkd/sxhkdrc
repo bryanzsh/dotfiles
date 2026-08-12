@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# =====================================================================
+# sxhkdrc  -  Atajos de teclado (daemon sxhkd).
+# Sintaxis: <combinacion de teclas> <tab> <comando>
+# Las llaves {a,b} expanden cadenas en paralelo. 'Return' es Enter.
+# =====================================================================
+
+# --- Terminal ---------------------------------------------------------
+# Super + Enter abre kitty (terminal principal).
+super + Return
+    kitty
+
+# --- Foco / cierre de ventanas ----------------------------------------
+# Super + q cierra la ventana enfocada (`bspc node -c`).
+super + q
+    bspc node -c
+
+# --- Alternar modos: tiling <-> floating ------------------------------
+# Super + Space conmuta el nodo enfocado entre tiled y floating.
+# Es un toggle real: consulta el estado actual y aplica el contrario.
+super + space
+    bspc query -N -n focused.floating >/dev/null && bspc node -t tiled || bspc node -t floating
+
+# --- Cambio de escritorio ----------------------------------------------
+# Super + [1-9] enfoca el escritorio numerado (son 9: 1..9).
+super + {1-9}
+    bspc desktop -f ^{1-9}
+
+# --- Utilidades basicas (imprescindibles para trabajar) ----------------
+# Super + Escape recarga sxhkd tras editar este archivo sin reiniciar.
+super + Escape
+    pkill -USR1 -x sxhkd
+
+# Super + Alt + q cierra la sesion de bspwm · Super + Alt + r la reinicia
+# (el reinicio es util tras editar bspwmrc; recarga en 1 segundo).
+super + alt + {q,r}
+    bspc {quit,wm -r}
+
+# --- Navegacion de foco entre ventanas (sin mouse) ---------------------
+# Ctrl + flechas enfoca la ventana en esa direccion (funciona en tiling).
+# west=izq, south=abajo, north=arriba, east=der segun la geometria.
+# OJO: pierdes el "salto de palabra" en terminales (lo captura sxhkd).
+ctrl + {Left,Down,Up,Right}
+    bspc node -f {west,south,north,east}
+
+# --- Mover ventana a otro escritorio ------------------------------------
+# Super + Shift + [1-9] manda la VENTANA ENFOCADA al escritorio elegido.
+# (Super + [1-9] normal solo cambia de escritorio; con Shift mueve la ventana.)
+super + shift + {1-9}
+    bspc node -d ^{1-9}
+
+# --- Reencajar desktop a la resolucion de la VM --------------------------
+# Super + Shift + R aplica la resolucion actual de la ventana de VMware
+# (xrandr --auto) y relanza polybar. Nec: tras redimensionar la VM.
+super + shift + r
+    ~/.config/bspwm/vm-resize.sh
