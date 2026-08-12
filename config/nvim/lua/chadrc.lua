@@ -7,6 +7,9 @@ local M = {}
 
 M.base46 = {
 	theme = "onedark",
+	-- nvim hereda el fondo #000000 de kitty (negro 100%, consistente
+	-- con el look de la VM). El tema solo aporta colores de sintaxis.
+	transparency = true,
 
 	-- hl_override = {
 	-- 	Comment = { italic = true },
@@ -15,10 +18,10 @@ M.base46 = {
 }
 
 -- M.nvdash = { load_on_startup = true }
--- M.ui = {
---       tabufline = {
---          lazyload = false
---      }
--- }
+M.ui = {
+    tabufline = {
+        lazyload = false, -- pestañas con nombres SIEMPRE visibles (1+ buffer)
+    },
+}
 
 return M
