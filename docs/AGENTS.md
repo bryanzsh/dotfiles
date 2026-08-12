@@ -10,15 +10,21 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 ## Entorno bspwm — archivos de config
 | Archivo | Contenido |
 |---|---|
-| `~/.config/bspwm/bspwmrc` | escritorios 1-9, gap 8, border 1, borde de foco blanco, teclado latam, wallpaper feh, autostart con guardas `pgrep`/`pkill` |
+| `~/.config/bspwm/bspwmrc` | escritorios 1-9, gap 8, border 1, borde de foco blanco, teclado latam, wallpaper **xwallpaper --daemon**, autostart con guardas `pgrep`/`pkill` + loop `bspc subscribe monitor_geometry` para relanzar polybar en resize |
 | `~/.config/sxhkd/sxhkdrc` | atajos (ver abajo) |
 | `~/.config/picom/picom.conf` | backend `xrender` (clave en VM), esquinas 12px, blur `dual_kawase` 5, active-opacity 0.90, inactive-opacity 0.80, log `/tmp/picom.log` |
 | `~/.config/polybar/config.ini` | barra negra, texto blanco, workspace enfocado invertido (blanco/negro), CPU/RAM/IP eth0/fecha-hora, monitor auto (env `MONITOR` desde bspwmrc) |
 | `~/.config/kitty/kitty.conf` | font 10, opacidad 0.80, tema Catppuccin Mocha con fondo override `#000000`, font **JetBrainsMono Nerd Font** (variante no-Mono, recomendada por NvChad; Hack Nerd queda en `/usr/share/fonts/truetype/hacknerd` si se usa), navegación de splits ctrl+shift+flechas, sin `adjust_line_height` (evita letras recortadas) |
 
+## Resize de la VM (importante, resuelto 2026-08-12)
+- **Driver X correcto:** `xserver-xorg-video-vmware` (instalado desde **Debian bookworm** temporal; Kali dejó de compilarlo). Kali BTS #9496: con `modesetting` + VMware Workstation 25.x los eventos de resize/EDID llegan tarde o se pierden. Con `vmware_drv.so` Xorg maneja los modos solo. Instalado ude: source temporal `deb http://deb.debian.org/debian bookworm` → `apt install xserver-xorg-video-vmware` → borrar source.
+- **Ya NO existen scripts de resize** (`vm-resize.sh` eliminado, atajo `Super+Shift+R` quitado). Estilo s4vitar: cero scripts. bspwm re-tila solo ante `monitor_geometry`.
+- **Fondo que sigue al resize:** `xwallpaper --daemon --zoom ~/Pictures/retro1.png` (escucha RandR y repinta solo). Sustituyó a `feh`.
+- **Polybar en resize:** loop inline en `bspwmrc`: `( pgrep -f 'bspc subscribe monitor_geometry' > /dev/null || bspc subscribe monitor_geometry | while read -r _; do ... polybar -r main &; done ) &`.
+
 ## Atajos de teclado
 - `Super+Enter` → kitty · `Super+Q` → cerrar ventana · `Super+Space` → toggle tiling/floating
-- `Super+1..9` → cambiar escritorio · `Super+Shift+1..9` → mover la ventana enfocada a ese escritorio · `Super+Shift+R` → reencajar desktop a la resolución nueva de la VM (`vm-resize.sh`: `xrandr --auto` + relanza polybar) · `Super+Escape` → recargar sxhkd · `Super+Alt+r` → reiniciar bspwm/picom · `Super+Alt+q` → salir
+- `Super+1..9` → cambiar escritorio · `Super+Shift+1..9` → mover la ventana enfocada a ese escritorio · `Super+Escape` → recargar sxhkd · `Super+Alt+r` → reiniciar bspwm/picom · `Super+Alt+q` → salir
 - `Ctrl+flechas` → cambiar foco entre ventanas de **bspwm** (borde blanco en la activa)
 - `Ctrl+Shift+flechas` → mover foco entre **splits dentro de kitty** · `Ctrl+Shift+Enter` → nuevo split
 - `Ctrl+Shift+F5` → recargar config de kitty · `Ctrl+Shift+O` → opacidad en vivo
@@ -39,7 +45,7 @@ Resumen de la configuración persistente del equipo para retomar el trabajo con 
 - Kit terminal con JetBrainsMono Nerd Font (fuente no-Mono = iconos NvChad más grandes). Cambios de config en `~/.config/nvim/lua/plugins/init.lua` + `lua/configs/`. Líder = `Space`.
 
 ## Wallpaper
-- `~/Pictures/retro1.png` con `feh --bg-fill --no-fehbg` (en vivo y persistente vía bspwmrc). Antes: `xsetroot -solid`.
+- `~/Pictures/retro1.png` con **`xwallpaper --daemon --zoom`** (se queda escuchando RandR y repinta solo cuando cambia la resolución de la VM). Antes: `feh --bg-fill --no-fehbg`, y antes `xsetroot -solid`.
 
 ## Notas técnicas importantes
 - **Picom en VM**: usar SIEMPRE backend `xrender` (el GL iría por llvmpipe = caro). Blur corre en CPU: en reposo ~0.5-2% CPU; si pasa de ~6-7% bajar `blur-strength`.

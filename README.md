@@ -9,7 +9,7 @@ Configuraciones de mi entorno de escritorio **ligero, estable y de bajo consumo*
 
 | Área | Archivos |
 |---|---|
-| WM | `config/bspwm/` (`bspwmrc`, `vm-resize.sh`) |
+| WM | `config/bspwm/bspwmrc` (wallpaper xwallpaper --daemon + loop polybar en resize) |
 | Atajos | `config/sxhkd/sxhkdrc` |
 | Terminal | `config/kitty/` (tema Catppuccin Mocha + negro total) |
 | Barra | `config/polybar/config.ini` (black/white, CPU/RAM/IP/fecha) |
@@ -34,7 +34,10 @@ si lo ejecutas de nuevo.
 ### Después de instalar
 1. Reinicia la sesión y elige **bspwm** en lightdm.
 2. En nvim: instala LSPs con `:Mason` (bajo demanda) y activa Copilot con `:Copilot auth`.
-3. Pon tu wallpaper en `~/Pictures/retro1.png` (bspwmrc lo carga con feh).
+3. Pon tu wallpaper en `~/Pictures/retro1.png` (xwallpaper lo carga).
+4. Si estás en VMware Workstation 25.x, el instalador trae el driver `xserver-xorg-video-vmware`
+   desde Debian bookworm para que el resize de la VM funcione (Kali lo dejó de compilar).
+   El fondo (`xwallpaper --daemon`) y polybar siguen al resize automáticamente.
 
 ## Atajos principales
 
@@ -47,7 +50,6 @@ si lo ejecutas de nuevo.
 | `Super+Shift+1..9` | mover ventana al escritorio |
 | `Ctrl+↓↑←→` | mover foco (bspwm) |
 | `Ctrl+Shift+↓↑←→` | mover foco entre splits de kitty |
-| `Super+Shift+R` | reencajar desktop a la resolución de la VM (`xrandr --auto`) |
 | `Super+Alt+R` | reiniciar bspwm |
 | `Super+Escape` | recargar sxhkd |
 
@@ -55,3 +57,6 @@ si lo ejecutas de nuevo.
 - **Picom usa backend `xrender`** (GPU virtual → nada de GL por software).
 - Blur ligero (`dual_kawase`); si la CPU sube de ~6-7% al mover ventanas, baja
   `blur-strength` a 3 o pon `blur-method = "none"`.
+- **Resize automático**: con `vmware_drv.so` bspwm retila solo ante `monitor_geometry`;
+  `xwallpaper --daemon` repinta el fondo y un loop `bspc subscribe monitor_geometry`
+  relanza polybar. Cero scripts de resize.

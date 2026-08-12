@@ -58,7 +58,7 @@ Script maestro que bspwm ejecuta al iniciar (y al reiniciar con `Super+Alt+r`). 
 | Bloque | Líneas | Qué hace y por qué |
 |---|---|---|
 | Teclado | `setxkbmap -layout latam` | Distribución latinoamericana (antes era `us`) |
-| Wallpaper | `feh --bg-fill --no-fehbg "$HOME/Pictures/retro1.png"` | Pinta la imagen y sale (no es daemon). `--bg-fill` escala recortando para cubrir la pantalla 1562×766 (la imagen es 2912×1632). `--no-fehbg` evita el mini-autostart que feh genera por defecto |
+| Wallpaper | `xwallpaper --daemon --zoom "$HOME/Pictures/retro1.png"` | Pinta y **se queda escuchando RandR**: repinta solo cuando cambia la resolución (resize de la VM). `--zoom` cubre la pantalla recortando según aspect ratio (la imagen es 2912×1632). Sustituyó a `feh --bg-fill` (que pintaba una sola vez y quedaba desalineado tras resize) |
 | Cursor | `xsetroot -cursor_name left_ptr` | Cursor flecha normal |
 | Escritorios | `bspc monitor -d 1 2 3 4 5 6 7 8 9` | 9 workspaces numerados, coinciden con `Super+[1-9]` |
 | Bordes | `border_width 1` | Borde de 1px; la ventana enfocada se marca en **blanco** (`active`/`focused #ffffff`), el resto gris oscuro `#30302f` |
@@ -67,6 +67,7 @@ Script maestro que bspwm ejecuta al iniciar (y al reiniciar con `Super+Alt+r`). 
 | Foco | `click_to_focus true`, `pointer_follows_focus true` | Clic enfoca; el cursor sigue a la ventana enfocada |
 | Autostart | guardas `pgrep`/`pkill` | Evita procesos duplicados al reiniciar bspwm (explicado abajo) |
 | Monitor | detección vía `xrandr` → `export MONITOR` | Polybar recibe el monitor por env; así no se hardcodea el nombre (los nombres cambian entre VM/real/Xvfb) |
+| Loop resize | `bspc subscribe monitor_geometry \| while read -r _; do … polybar -r main &; done` | Relanza polybar cuando cambia la geometría del monitor (resize de la VM) porque su ancho `width=100%` se calcula al arrancar y no se auto-ajusta |
 
 **Razón de los guardas anti-duplicado:** `bspwmrc` se re-ejecuta en cada reinicio de bspwm. Sin `pgrep -x <proc> || <proc>` se lanzarían copias dobles (doble CPU/RAM). Para polybar se usa `pkill` + re-lanzamiento: es el método estándar, así la barra aplica cambios de config.
 
@@ -223,8 +224,8 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 ## 11. Wallpaper
 
 - Imagen: `~/Pictures/retro1.png` (2912×1632, 16:9).
-- Herramienta: **feh** (`--bg-fill --no-fehbg`) desde `bspwmrc` y aplicado en vivo con `DISPLAY=:0 feh --bg-fill --no-fehbg …`.
-- Verificación objetiva: feh deja el root asignado (variable X `_XROOTPMAP_ID`); no es daemon → 0% CPU.
+- Herramienta: **xwallpaper** (`--daemon --zoom`) desde `bspwmrc` y aplicado en vivo con `DISPLAY=:0 xwallpaper --zoom ~/Pictures/retro1.png`.
+- **Por qué `--daemon`**: xwallpaper se queda escuchando eventos **RandR** y **repinta solo** el fondo cuando cambia la resolución (achicar/expandir la VM). Sustituyó a `feh --bg-fill --no-fehbg`, que pintaba una sola vez y quedaba desalineado tras el resize. CPU en reposo ~0% (solo despierta con RandR).
 - Con la transparencia de picom, el wallpaper se ve desenfocado detrás de las ventanas inactivas.
 
 ---
@@ -362,7 +363,7 @@ polybar -r main &
 
 **Por qué / decisiones en este archivo:**
 - **`setxkbmap -layout latam`**: tu teclado físico es latinoamericano.
-- **`feh --bg-fill --no-fehbg`**: se sustituyó el antiguo `xsetroot -solid`. `--bg-fill` escala la imagen 2912×1632 recortando para cubrir tu pantalla 1562×766; `--no-fehbg` evita el autostart que feh genera solo (el arranque lo controlamos nosotros).
+- **`xwallpaper --daemon --zoom`**: sustituyó al antiguo `feh --bg-fill --no-fehbg` (y antes `xsetroot -solid`). `--zoom` escala la imagen 2912×1632 recortando para cubrir la pantalla; `--daemon` escucha eventos RandR y **repinta solo** cuando cambia la resolución de la VM (feh pintaba una sola vez y quedaba desalineado).
 - **`bspc monitor -d 1..9`**: 9 escritorios que coinciden 1 a 1 con `Super+[1-9]` y `Super+Shift+[1-9]`.
 - **Bordes en blanco**: la ventana enfocada (por teclado con `Ctrl+flechas` o por ratón) se resalta en blanco; las demás en gris oscuro `#30302f`. El borde blanco es lo que te permite *ver* qué ventana tienes enfocada sin mirar el entorno.
 - **`window_gap 8`**: era 12; se bajó para ganar espacio y hacer el layout más compacto.
@@ -666,7 +667,8 @@ picom   ~1.5 % CPU  ~9   MB RAM   (blur dual_kawase 5 + esquinas + opacidad)
 polybar ~2.0 % CPU  ~20  MB RAM   (5 módulos)
 
 # Paquetes clave instalados (dpkg): bspwm 0.9.12 · sxhkd 0.6.3 · polybar 3.7.2
-# · picom 13 · kitty 0.47.3 · lsd 1.2.0 · bat 0.26.1 (+batcat) · feh 3.12.2
+# · picom 13 · kitty 0.47.3 · lsd 1.2.0 · bat 0.26.1 (+batcat) · xwallpaper 0.7.6
 # · fastfetch 2.66.0 · zsh 5.9 · fonts: JetBrainsMono Nerd (activa) + Hack Nerd (no usada)
+# · xserver-xorg-video-vmware 13.3.0 (desde Debian bookworm; fix resize en Workstation 25.x)
 
 # Fallback rápido si picom pesa: en picom.conf poner blur-method = "none" y `bspc wm -r`.

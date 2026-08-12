@@ -23,8 +23,9 @@
 - 9 escritorios `1..9`
 - `border_width 1` · borde de la ventana enfocada **blanco** (`#ffffff`), resto gris `#30302f`
 - `window_gap 8`
-- Teclado latam · wallpaper feh · autostart con guardas `pgrep`/`pkill`
+- Teclado latam · wallpaper **xwallpaper --daemon** · autostart con guardas `pgrep`/`pkill`
 - Monitor de polybar detectado por `xrandr` (sin hardcodear)
+- **Loop `bspc subscribe monitor_geometry`** (inline) que relanza polybar al cambiar la resolución
 
 **Por qué:**
 - 9 escritorios → coinciden con `Super+[1-9]` y `Super+Shift+[1-9]`.
@@ -32,6 +33,7 @@
 - `gap 8` → se bajó de 12 para un layout compacto que aproveche la pantalla.
 - Guardas anti-duplicado → bspwmrc se re-ejecuta en `Super+Alt+r`; sin `pgrep` habría dobles procesos (doble RAM/CPU).
 - Monitor dinámico → el nombre cambia entre tu VM, otras VMs y Xvfb; hardcodearlo rompe la barra.
+- Loop de resize → al achicar/expandir la ventana de la VM, polybar no ajusta su ancho sola (width=% se calcula al arrancar); el `bspc subscribe monitor_geometry` la relanza sola, estilo s4vitar (cero scripts).
 
 ---
 
@@ -153,8 +155,9 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ## 9. Wallpaper
 
-- `~/Pictures/retro1.png` con `feh --bg-fill --no-fehbg` (en bspwmrc).
-- **Por qué `--bg-fill`**: la imagen (2912×1632) cubre tu pantalla (1562×766) recortando; `--no-fehbg` evita el mini-autostart de feh. feh pinta y sale (no es daemon) → 0% CPU en reposo.
+- `~/Pictures/retro1.png` con **`xwallpaper --daemon --zoom`** (en bspwmrc).
+- **Por qué `--zoom`**: equivale a `--bg-fill` de feh — la imagen (2912×1632) cubre la pantalla recortando según el aspect ratio.
+- **Por qué `--daemon`**: xwallpaper se queda escuchando **eventos RandR** y **repinta solo** el fondo cuando cambia la resolución (achicar/expandir la VM). feh pintaba una sola vez y quedaba desalineado con el resize. CPU en reposo ~0% (solo despierta ante RandR).
 
 ---
 
@@ -171,11 +174,13 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ---
 
-## 11. Resize de la ventana VM (Super+Shift+R)
+## 11. Resize de la VM (resuelto, cero scripts)
 
-- `~/.config/bspwm/vm-resize.sh` + atajo `super + shift + r` en sxhkdrc.
-- Con un WM tiling las VMware Tools solo marcan el nuevo tamaño como "preferred"; `xrandr --auto` lo activa, RandR emite `monitor_geometry` y bspwm re-dibuja solo. Polybar se relanza aparte (su ancho no se auto-ajusta).
-- Fix extra: `pgrep -u "$(id -u)"` en bspwmrc y vm-resize.sh (`$UID` no existe en `sh`, daba usage de pgrep).
+- **Driver X:** `xserver-xorg-video-vmware` desde Debian bookworm (Kali lo dejó de compilar). Con `modesetting` + VMware Workstation 25.x los eventos de resize/EDID llegan tarde o se pierden (Kali BTS #9496); con `vmware_drv.so` Xorg maneja los modos y bspwm re-tila solo ante `monitor_geometry`.
+- **Ya NO existe `vm-resize.sh` ni `Super+Shift+R`** (estilo s4vitar: cero scripts).
+- **Fondo:** `xwallpaper --daemon` repinta automático.
+- **Polybar:** loop inline en `bspwmrc`: `bspc subscribe monitor_geometry | while read -r _; do pkill -x polybar; polybar -r main &; done` (guarda `pgrep -f` anti-duplicado). Su ancho no se auto-ajusta si no se relanza.
+- Fix aplicado: `pgrep -u "$(id -u)"` (`$UID` no existe en `sh`, daba usage).
 
 ## 12. Cómo recargar cada pieza
 

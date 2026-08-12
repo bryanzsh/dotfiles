@@ -9,11 +9,12 @@
 # Distribucion latinoamericana. Ajusta con: setxkbmap -layout <código>
 setxkbmap -layout latam
 
-# --- Fondo de pantalla (wallpaper con feh) -----------------------------
-# feh pinta la imagen y sale (no es un daemon). "--bg-fill" escala
-# recortando para cubrir toda la pantalla; "--no-fehbg" evita que feh
-# genere su propio mini-autostart (ya lo controlamos desde este archivo).
-feh --bg-fill --no-fehbg "$HOME/Pictures/retro1.png"
+# --- Fondo de pantalla (wallpaper con xwallpaper) ----------------------
+# xwallpaper "pinta y sale", pero con "--daemon" se queda escuchando
+# eventos RandR y REPINTA el wallpaper solo cuando cambia la resolucion
+# (achicar/expandir la ventana de la VM). "--zoom" equivale a "--bg-fill"
+# de feh: cubre toda la pantalla recortando segun el aspect ratio.
+xwallpaper --daemon --zoom "$HOME/Pictures/retro1.png" &
 # Cursor de X como flecha normal (en vez del icono por defecto).
 xsetroot -cursor_name left_ptr
 
@@ -61,6 +62,16 @@ export MONITOR
 pkill -x polybar 2> /dev/null
 while pgrep -u "$(id -u)" -x polybar > /dev/null; do sleep 0.1; done
 polybar -r main &
+
+# polybar + resize: al cambiar la geometria del monitor (resize de la VM)
+# el ancho de la barra queda calculado con el valor viejo. Este loop se
+# suscribe al evento monitor_geometry de bspwm y relanza polybar sola.
+( pgrep -f 'bspc subscribe monitor_geometry' > /dev/null || \
+    bspc subscribe monitor_geometry | while read -r _; do
+      pkill -x polybar 2> /dev/null
+      while pgrep -u "$(id -u)" -x polybar > /dev/null; do sleep 0.1; done
+      polybar -r main &
+    done ) &
 
 # VMware Tools GUI: portapapeles + drag&drop + resize host<->guest.
 # (El agente vmware-user solo se auto-lanza en DE con gestor de sesion;

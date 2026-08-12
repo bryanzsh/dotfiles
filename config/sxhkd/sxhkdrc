@@ -49,9 +49,3 @@ ctrl + {Left,Down,Up,Right}
 # (Super + [1-9] normal solo cambia de escritorio; con Shift mueve la ventana.)
 super + shift + {1-9}
     bspc node -d ^{1-9}
-
-# --- Reencajar desktop a la resolucion de la VM --------------------------
-# Super + Shift + R aplica la resolucion actual de la ventana de VMware
-# (xrandr --auto) y relanza polybar. Nec: tras redimensionar la VM.
-super + shift + r
-    ~/.config/bspwm/vm-resize.sh

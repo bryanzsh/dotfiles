@@ -37,9 +37,32 @@ install_packages() {
     sudo apt-get install -y \
         bspwm sxhkd polybar picom kitty \
         zsh zsh-syntax-highlighting zsh-autosuggestions \
-        lsd bat fastfetch feh x11-xserver-utils \
+        lsd bat fastfetch xwallpaper x11-xserver-utils \
         ripgrep tree-sitter-cli nvim \
         open-vm-tools open-vm-tools-desktop
+}
+
+# ---------------------------------------------------------------------
+# 1b) Driver X de VMware (resize de la VM en Workstation 25.x)
+# ---------------------------------------------------------------------
+# Kali dejo de compilar xserver-xorg-video-vmware. Con "modesetting" +
+# Workstation 25.x los eventos de resize/EDID llegan tarde o se pierden
+# (Kali BTS #9496). Se instala desde Debian bookworm con source temporal.
+install_vmware_driver() {
+    say "Instalando xserver-xorg-video-vmware (desde Debian bookworm)..."
+    need_sudo
+    if [ -e /usr/lib/xorg/modules/drivers/vmware_drv.so ]; then
+        warn "vmware_drv.so ya instalado."
+        return
+    fi
+    sudo tee /etc/apt/sources.list.d/tmp-debian-bookworm.list >/dev/null <<'EOF'
+deb http://deb.debian.org/debian bookworm main contrib non-free
+EOF
+    sudo apt-get update -y >/dev/null 2>&1
+    sudo apt-get install -y xserver-xorg-video-vmware
+    sudo rm -f /etc/apt/sources.list.d/tmp-debian-bookworm.list
+    sudo apt-get update -y >/dev/null 2>&1
+    warn "Reinicia el sesion (lightdm) para que Xorg cargue vmware_drv.so."
 }
 
 # ---------------------------------------------------------------------
@@ -95,7 +118,7 @@ install_configs() {
         cp -a "$REPO_DIR/config/$app/." "$CONFIG_DIR/$app/"
         warn "Config de $app instalada (se sobrescribio la existente)."
     done
-    chmod +x "$CONFIG_DIR/bspwm/bspwmrc" "$CONFIG_DIR/bspwm/vm-resize.sh" 2>/dev/null || true
+    chmod +x "$CONFIG_DIR/bspwm/bspwmrc" 2>/dev/null || true
 }
 
 # ---------------------------------------------------------------------
@@ -138,7 +161,7 @@ install_root() {
         sudo cp -a "$REPO_DIR/config/." /root/.config/ 2>/dev/null || true
         sudo install -D -m 600 "$REPO_DIR/home/.zshrc" /root/.zshrc
         sudo install -D -m 600 "$REPO_DIR/home/.p10k.zsh" /root/.p10k.zsh
-        sudo chmod +x /root/.config/bspwm/bspwmrc /root/.config/bspwm/vm-resize.sh 2>/dev/null || true
+        sudo chmod +x /root/.config/bspwm/bspwmrc 2>/dev/null || true
     fi
 }
 
@@ -152,14 +175,16 @@ Hecho. Pasos manuales pendientes:
   * nvim    -> los LSPs se instalan bajo demanda con `:Mason`
   * Copilot -> dentro de nvim ejecuta `:Copilot auth` y sigue el codigo
                (red y root si usaste --root). Sin eso Copilot no responde.
-  * Resize  -> tras redimensionar la ventana de la VM usa Super+Shift+R
-  * Wallpaper: coloca tu imagen en ~/Pictures/retro1.png (bspwmrc la usa)
+  * Resize  -> automatico: con vmware_drv.so + xwallpaper --daemon + loop de
+               polybar el entorno reajusta todo al redimensionar la VM.
+  * Wallpaper: coloca tu imagen en ~/Pictures/retro1.png (xwallpaper la usa)
 EOF
 }
 
 # ---------------------------------------------------------------------
 main() {
     install_packages
+    install_vmware_driver
     install_font
     install_p10k
     install_configs
