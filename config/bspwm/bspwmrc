@@ -77,7 +77,10 @@ fi
 [ -z "$MONITOR" ] && MONITOR=$(xrandr --current | grep -E '\bconnected\b' | grep -v disconnected | awk '{print $1}' | head -1)
 export MONITOR
 pkill -x polybar 2> /dev/null
-while pgrep -u "$(id -u)" -x polybar > /dev/null; do sleep 0.1; done
+# Espera a que no quede NINGUN polybar vivo (no-zombi). Si el proceso
+# queda como <defunct> (Z) no bloquea: pgrep -x polybar lo seguira viendo
+# y colgaria el relanzamiento; ps + filtro de estado lo ignora.
+while ps -C polybar -o stat= --no-headers 2>/dev/null | grep -qv '^Z'; do sleep 0.1; done
 polybar -r main &
 
 # polybar + resize: al cambiar la geometria del monitor (resize de la VM)
@@ -86,7 +89,7 @@ polybar -r main &
 ( pgrep -f 'bspc subscribe monitor_geometry' > /dev/null || \
     bspc subscribe monitor_geometry | while read -r _; do
       pkill -x polybar 2> /dev/null
-      while pgrep -u "$(id -u)" -x polybar > /dev/null; do sleep 0.1; done
+      while ps -C polybar -o stat= --no-headers 2>/dev/null | grep -qv '^Z'; do sleep 0.1; done
       polybar -r main &
     done ) &
 

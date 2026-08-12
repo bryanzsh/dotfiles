@@ -24,8 +24,7 @@ return {
       -- NvChad usa Tab para cmp; desactivamos el Tab de copilot.
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
-      -- Aceptar sugerencia inline con Ctrl+L (no choca con nada).
-      vim.api.nvim_set_keymap("i", "<C-l>", "<Plug>(copilot-accept-line)", {})
+      -- El <C-l> acepta la sugerencia (definido en lua/mappings.lua).
     end,
   },
 
