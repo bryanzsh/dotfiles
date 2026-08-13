@@ -1,3 +1,10 @@
 # Backups locales de configuracion creados por install.sh
 *.bak
 *.orig
+
+# Archivos de trabajo / scratch (no son configs de usuario)
+docs/cambiosrepo
+docs/t.py
+
+# Archivos de runtime (se generan al usar el entorno)
+config/polybar/target.txt

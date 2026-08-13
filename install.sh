@@ -35,7 +35,7 @@ install_packages() {
     need_sudo
     sudo apt-get update -y
     sudo apt-get install -y \
-        bspwm sxhkd polybar picom kitty \
+        bspwm sxhkd polybar picom kitty rofi xclip \
         zsh zsh-syntax-highlighting zsh-autosuggestions \
         lsd bat fastfetch xwallpaper x11-xserver-utils \
         ripgrep tree-sitter-cli nvim \
@@ -111,7 +111,7 @@ copy_with_backup() {
 # ---------------------------------------------------------------------
 install_configs() {
     say "Copiando configuraciones a ~/.config..."
-    local apps=(bspwm sxhkd kitty polybar picom nvim)
+    local apps=(bspwm sxhkd kitty polybar picom nvim rofi)
     for app in "${apps[@]}"; do
         [ -d "$REPO_DIR/config/$app" ] || continue
         mkdir -p "$CONFIG_DIR/$app"
@@ -122,12 +122,28 @@ install_configs() {
 }
 
 # ---------------------------------------------------------------------
-# 5) Home dotfiles (.zshrc, .p10k.zsh)
+# 4b) Bootstrap de NvChad: descarga los plugins con lazy.nvim en headless.
+#     (El starter de NvChad instala lazy.nvim y el resto solo al abrir nvim;
+#      este paso lo deja listo sin abrir la UI.)
+# ---------------------------------------------------------------------
+bootstrap_nvchad() {
+    if ! command -v nvim >/dev/null 2>&1; then
+        warn "nvim no esta instalado; se salta el bootstrap de NvChad."
+        return
+    fi
+    say "Bootstrapeando plugins de NvChad (nvim --headless +Lazy! sync +qa)..."
+    nvim --headless "+Lazy! sync" +qa 2>/dev/null \
+        || warn "El bootstrap de NvChad fallo; ejecuta 'nvim' y manualmente +Lazy! sync +qa."
+}
+
+# ---------------------------------------------------------------------
+# 5) Home dotfiles (.zshrc, .p10k.zsh, .gitconfig)
 # ---------------------------------------------------------------------
 install_home() {
     say "Instalando dotfiles de HOME..."
     [ -f "$REPO_DIR/home/.zshrc" ] && copy_with_backup "$REPO_DIR/home/.zshrc" "$HOME/.zshrc"
     [ -f "$REPO_DIR/home/.p10k.zsh" ] && copy_with_backup "$REPO_DIR/home/.p10k.zsh" "$HOME/.p10k.zsh"
+    [ -f "$REPO_DIR/home/.gitconfig" ] && copy_with_backup "$REPO_DIR/home/.gitconfig" "$HOME/.gitconfig"
 }
 
 # ---------------------------------------------------------------------
@@ -161,6 +177,7 @@ install_root() {
         sudo cp -a "$REPO_DIR/config/." /root/.config/ 2>/dev/null || true
         sudo install -D -m 600 "$REPO_DIR/home/.zshrc" /root/.zshrc
         sudo install -D -m 600 "$REPO_DIR/home/.p10k.zsh" /root/.p10k.zsh
+        [ -f "$REPO_DIR/home/.gitconfig" ] && sudo install -D -m 600 "$REPO_DIR/home/.gitconfig" /root/.gitconfig
         sudo chmod +x /root/.config/bspwm/bspwmrc 2>/dev/null || true
     fi
 }
@@ -175,9 +192,13 @@ Hecho. Pasos manuales pendientes:
   * nvim    -> los LSPs se instalan bajo demanda con `:Mason`
   * Copilot -> dentro de nvim ejecuta `:Copilot auth` y sigue el codigo
                (red y root si usaste --root). Sin eso Copilot no responde.
+  * Target  -> escribe una IP en ~/.config/polybar/target.txt para que el
+               modulo "target" de polybar la muestre en rojo; vacialo o
+               borra el archivo para volver a "target: none".
   * Resize  -> automatico: con vmware_drv.so + xwallpaper --daemon + loop de
                polybar el entorno reajusta todo al redimensionar la VM.
-  * Wallpaper: coloca tu imagen en ~/Pictures/retro1.png (xwallpaper la usa)
+  * Wallpaper: pon tus imagenes en ~/Pictures/ (png/jpg/jpeg); el bucle
+               rotativo las muestra cada 60 segundos.
 EOF
 }
 
@@ -188,6 +209,7 @@ main() {
     install_font
     install_p10k
     install_configs
+    bootstrap_nvchad
     install_home
     install_session
     install_root

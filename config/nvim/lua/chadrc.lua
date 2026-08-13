@@ -6,7 +6,7 @@
 local M = {}
 
 M.base46 = {
-	theme = "onedark",
+	theme = "bearded-arc",
 	-- nvim hereda el fondo #000000 de kitty (negro 100%, consistente
 	-- con el look de la VM). El tema solo aporta colores de sintaxis.
 	transparency = true,

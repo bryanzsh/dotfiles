@@ -49,3 +49,13 @@ ctrl + {Left,Down,Up,Right}
 # (Super + [1-5] normal solo cambia de escritorio; con Shift mueve la ventana.)
 super + shift + {1-5}
     bspc node -d ^{1-5}
+
+# --- Recargar config de bspwm (re-tila y re-descubre monitores) ----------
+# Super + Shift + R = `bspc wm -r`. Equivalente a Super+Alt+r (que ademas
+# reinicia picom); este es mas suave: solo bspwm.
+super + shift + r
+    bspc wm -r
+
+# --- Lanzador de aplicaciones (rofi) ---------------------------------------
+super + d
+    rofi -show drun

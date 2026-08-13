@@ -37,13 +37,40 @@ return {
     opts = {},
   },
 
-  -- {
-  -- 	"nvim-treesitter/nvim-treesitter",
-  -- 	opts = {
-  -- 		ensure_installed = {
-  -- 			"vim", "lua", "vimdoc",
-  --      "html", "css"
-  -- 		},
-  -- 	},
-  -- },
+  -- Treesitter: parsers para resaltado de sintaxis bonito.
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        "lua", "luadoc", "printf", "vim", "vimdoc",
+        "python", "bash", "c", "html", "css", "json", "yaml", "markdown", "javascript",
+      },
+    },
+  },
+
+  -- Colorizer: muestra los codigos hex/colores con su color real en el codigo.
+  {
+    "NvChad/nvim-colorizer.lua",
+    lazy = false,
+    config = function()
+      -- En headless (instalacion de parsers, CI) no hay termguicolors.
+      if not vim.o.termguicolors then
+        vim.o.termguicolors = true
+      end
+      pcall(function()
+        require("colorizer").setup {
+          filetypes = { "*" },
+          user_default_options = {
+            RGB = true,
+            RRGGBB = true,
+            RRGGBBAA = true,
+            rgba = true,
+            hsl = true,
+            css = true,
+            names = false,
+          },
+        }
+      end)
+    end,
+  },
 }
